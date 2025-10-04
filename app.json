@@ -49,11 +49,8 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "8eb19581-3fee-4347-9dd0-4726ea2e9ef2"
-      }
+      "router": {}
     },
-    "owner": "haythembns"
+    "owner": "koussayz"
   }
 }
