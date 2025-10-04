@@ -49,7 +49,10 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "b1706f4a-2260-4df9-ad6c-d436f1184a8e"
+      }
     },
     "owner": "koussayz"
   }
