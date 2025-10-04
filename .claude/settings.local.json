@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(java:*)",
+      "Bash(echo $ANDROID_HOME)",
+      "Bash(sudo gem install:*)",
+      "Bash(gem install:*)",
+      "Bash(ruby --version)",
+      "Bash(npx expo:*)",
+      "Bash(npx eas-cli:*)",
+      "Bash(xcrun simctl list:*)",
+      "Read(//Users/koss/**)",
+      "Read(//Applications/**)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout 30 npx expo start --web --no-open)",
+      "Bash(npx expo-doctor:*)",
+      "Bash(cat:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(xcrun simctl openurl:*)",
+      "Read(//private/tmp/**)",
+      "Bash(killall:*)",
+      "Bash(kill:*)",
+      "Bash(deno:*)",
+      "Bash(grep:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
