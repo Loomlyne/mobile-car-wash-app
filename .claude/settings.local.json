@@ -30,7 +30,13 @@
       "Bash(grep:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(supabase status:*)",
+      "Bash(brew install:*)",
+      "Bash(npx supabase:*)",
+      "Bash(python3:*)",
+      "Bash(docker stop:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

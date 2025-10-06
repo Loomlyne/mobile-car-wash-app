@@ -12,11 +12,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
-// ✅ Use react-native-firebase instead of expo-firebase-recaptcha
-import auth from '@react-native-firebase/auth';
 import { useAuth } from './context/AuthContext';
 
 bcrypt.setRandomFallback((len) => {
@@ -43,42 +42,48 @@ export default function SignUp() {
 
   const { cars } = useCarContext();
   const router = useRouter();
-  const { setConfirmation, setPendingUserData } = useAuth();
+  const { signUp } = useAuth();
 
   const isValidPhone = /^\d{8,}$/.test(phone.trim());
   const isValid = firstName && lastName && isValidPhone && password && agree;
   const getDialCode = () => country?.callingCode?.[0] || '971';
 
   const handleSignUp = async () => {
-    // if (!isValid) {
-    //   setError('Please fill all fields.');
-    //   return;
-    // }
-    // setLoading(true);
-    // setError('');
+    if (!isValid) {
+      setError('Please fill all fields.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
     try {
-      // const dialCode = getDialCode();
-      // const fullPhone = `+${dialCode}${phone.trim()}`;
-      
-      // // store pending user data in context
-      // setPendingUserData({
-      //   firstName,
-      //   lastName,
-      //   email,
-      //   phone: fullPhone,
-      //   cars,
-      // });
+      const dialCode = getDialCode();
+      const fullPhone = `+${dialCode}${phone.trim()}`;
 
-      // // ✅ Send OTP (no recaptcha required with react-native-firebase)
-      // const confirmation = await auth().signInWithPhoneNumber(fullPhone);
-      // setConfirmation(confirmation);
+      // Sign up with Supabase (stores pending data and sends OTP)
+      const { error: signUpError } = await signUp({
+        firstName,
+        lastName,
+        email,
+        phone: fullPhone,
+        cars,
+      });
 
-      router.push('/VerificationCode');
+      if (signUpError) {
+        setError(signUpError);
+        setLoading(false);
+        return;
+      }
+
+      // Navigate to verification screen
+      router.push({
+        pathname: '/VerificationCode',
+        params: { phone: fullPhone, isSignUp: 'true' },
+      });
     } catch (err: any) {
       setError(err.message || 'Sign up failed');
-    } finally {
-      // setLoading(false);
-      console.log("logged in")
+      setLoading(false);
     }
   };
 

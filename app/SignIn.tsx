@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { signInWithPhoneNumber } from 'firebase/auth';
-import { auth } from '@/firebase/firebase';
 import CountryPicker, { Country, getCallingCode } from 'react-native-country-picker-modal';
 import { useAuth } from './context/AuthContext';
 
@@ -17,7 +16,7 @@ export default function SignIn() {
   const [callingCode, setCallingCode] = useState('971');
 
   const router = useRouter();
-  const { setConfirmation } = useAuth();
+  const { sendOTP } = useAuth();
 
   const isValidPhone = /^\d{6,}$/.test(phone.trim());
 
@@ -28,29 +27,34 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     try {
-      // if (!agree) {
-      //   setError('Please agree to the terms first');
-      //   return;
-      // }
-      // setLoading(true);
-      // setError('');
+      if (!agree) {
+        setError('Please agree to the terms first');
+        return;
+      }
 
-      // const fullPhone = `+${callingCode}${phone.trim()}`;
+      setLoading(true);
+      setError('');
 
-      // // ✅ With Firebase SDK on mobile, no recaptchaVerifier is needed.
-      // const confirmation = await signInWithPhoneNumber(auth, fullPhone);
+      const fullPhone = `+${callingCode}${phone.trim()}`;
 
-      // setConfirmation(confirmation);
-      // router.push({
-      //   pathname: '/VerificationCode',
-      //   params: { phone: fullPhone },
-      // });
-      console.log("logging in")
+      // Send OTP via Supabase
+      const { error: otpError } = await sendOTP(fullPhone);
+
+      if (otpError) {
+        setError(otpError);
+        setLoading(false);
+        return;
+      }
+
+      // Navigate to verification screen
+      router.push({
+        pathname: '/VerificationCode',
+        params: { phone: fullPhone },
+      });
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to send OTP');
-    } finally {
-      router.push("/")
+      setLoading(false);
     }
   };
 

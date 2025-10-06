@@ -3,18 +3,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from './context/AuthContext';
-import { addDoc, collection, doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/firebase/firebase';
 
 export default function VerificationCode() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -24,17 +20,12 @@ export default function VerificationCode() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const phone = params.phone as string;
-  const fromSignUp = params.fromSignUp === 'true';
-  const userId = params.userId as string;
-  const firstName = params.firstName as string | undefined;
-  const lastName = params.lastName as string | undefined;
-  const email = params.email as string | undefined;
-  const referral = params.referral as string | undefined;
+  const isSignUp = params.isSignUp === 'true';
   const [timer, setTimer] = useState(20);
   const [resending, setResending] = useState(false);
   const otpValue = otp.join('');
   const activeIndex = otp.findIndex((d) => d === '');
-  const {confirmation, pendingUserData, setPendingUserData } = useAuth();
+  const { verifyOTP, sendOTP } = useAuth();
   const handleChange = (text: string) => {
     let clean = text.replace(/[^0-9]/g, '').slice(0, 6);
     let arr = clean.split('');
@@ -47,38 +38,29 @@ export default function VerificationCode() {
   };
 
   const handleVerify = async () => {
-    if (otp.length < 6) return;
-    // setLoading(true);
-    // setError('');
-    try {
-      // if (!confirmation) {
-      //   console.error("No confirmation found");
-      //   return;
-      // }
-      // const result = await confirmation.confirm("123456");
-      // const user = result.user;
+    const code = otp.join('');
+    if (code.length !== 6) {
+      setError('Please enter the complete 6-digit code');
+      return;
+    }
 
-      // // Save user data into Firestore
-      // const userRef = doc(db, "users", user.uid);
-      // const docSnap = await getDoc(userRef);
-      // if (!docSnap.exists()) {
-      //   // create only if user doesn't already exist
-      //   await setDoc(userRef, {
-      //     ...pendingUserData,
-      //     email: user.email || null,
-      //     phoneNumber: user.phoneNumber || null,
-      //     createdAt: new Date(),
-      //   });
-      //   setPendingUserData(null); // clear temp data
-      // }
-      // console.log(result)
+    setLoading(true);
+    setError('');
+
+    try {
+      const { error: verifyError } = await verifyOTP(phone, code);
+
+      if (verifyError) {
+        setError(verifyError);
+        setLoading(false);
+        return;
+      }
+
+      // Success - navigate to home
       router.replace('/(tabs)');
-      
     } catch (err: any) {
-      setError( err.message || 'Invalid code');
-    } finally {
-      // setLoading(false);
-      console.log("logged in")
+      setError(err.message || 'Verification failed');
+      setLoading(false);
     }
   };
 
@@ -98,9 +80,13 @@ export default function VerificationCode() {
     setResending(true);
     setError('');
     try {
-      const { error: resendError } = await supabase.auth.signInWithOtp({ phone });
-      if (resendError) throw resendError;
-      setTimer(20);
+      const { error: resendError } = await sendOTP(phone);
+      if (resendError) {
+        setError(resendError);
+      } else {
+        setTimer(20);
+        setOtp(['', '', '', '', '', '']);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to resend code');
     } finally {

@@ -47,7 +47,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } else {
         // Default to device locale if available
         const deviceLocale = Localization.locale;
-        const deviceLang = deviceLocale.startsWith('ar') ? 'ar' : 'en';
+        const deviceLang = deviceLocale && typeof deviceLocale === 'string' && deviceLocale.startsWith('ar') ? 'ar' : 'en';
         setLanguageState(deviceLang);
         i18n.locale = deviceLang;
         setIsRTL(deviceLang === 'ar');
